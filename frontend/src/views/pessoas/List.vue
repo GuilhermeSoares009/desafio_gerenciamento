@@ -45,13 +45,11 @@
 
             <tbody>
               <tr
-                v-for="pessoa in filteredPessoas"
+                v-for="pessoa in paginatedPessoas"
                 :key="pessoa.id"
                 class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
               >
-                <td class="px-4 py-3 font-medium text-gray-900 dark:text-white">
-                  {{ pessoa.nome }}
-                </td>
+                <td class="px-4 py-3 font-medium text-gray-900 dark:text-white">{{ pessoa.nome }}</td>
                 <td class="px-4 py-3">{{ pessoa.cpf }}</td>
                 <td class="px-4 py-3">
                   <span 
@@ -65,40 +63,65 @@
                 </td>
                 <td class="px-4 py-3">{{ pessoa.telefone }}</td>
                 <td class="px-4 py-3">{{ pessoa.email }}</td>
-
                 <td class="px-4 py-3 text-right">
-                  <button 
-                    @click="abrirModalEditar(pessoa)"
-                    class="text-blue-600 hover:underline mr-3"
-                  >
-                    ✏️ Editar
-                  </button>
-                  <button 
-                    @click="deletar(pessoa.id)"
-                    class="text-red-600 hover:underline"
-                  >
-                    🗑️ Excluir
-                  </button>
+                  <button @click="abrirModalEditar(pessoa)" class="text-blue-600 hover:underline mr-3">✏️ Editar</button>
+                  <button @click="deletar(pessoa.id)" class="text-red-600 hover:underline">🗑️ Excluir</button>
                 </td>
               </tr>
 
-              <tr v-if="filteredPessoas.length === 0">
+              <tr v-if="paginatedPessoas.length === 0">
                 <td colspan="6" class="px-4 py-8 text-center text-gray-500">
                   Nenhuma pessoa encontrada
                 </td>
               </tr>
             </tbody>
           </table>
-        </div>
 
+          <!-- Pagination -->
+          <nav class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-3 md:space-y-0 p-4" aria-label="Table navigation">
+            <span class="text-sm font-normal text-gray-500 dark:text-gray-400">
+              Mostrando
+              <span class="font-semibold text-gray-900 dark:text-white">{{ startItem }}-{{ endItem }}</span>
+              de
+              <span class="font-semibold text-gray-900 dark:text-white">{{ filteredPessoas.length }}</span>
+            </span>
+
+            <ul class="inline-flex items-stretch -space-x-px">
+              <li>
+                <button @click="prevPage" :disabled="currentPage === 1" class="flex items-center justify-center h-full py-1.5 px-3 ml-0 text-gray-500 bg-white rounded-l-lg border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+                  <span class="sr-only">Previous</span>
+                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+              </li>
+
+              <li v-for="page in totalPages" :key="page">
+                <button
+                  @click="goToPage(page)"
+                  :class="page === currentPage
+                    ? 'flex items-center justify-center text-sm z-10 py-2 px-3 leading-tight text-primary-600 bg-primary-50 border border-primary-300 hover:bg-primary-100 hover:text-primary-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white'
+                    : 'flex items-center justify-center text-sm py-2 px-3 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white'"
+                >
+                  {{ page }}
+                </button>
+              </li>
+
+              <li>
+                <button @click="nextPage" :disabled="currentPage === totalPages" class="flex items-center justify-center h-full py-1.5 px-3 leading-tight text-gray-500 bg-white rounded-r-lg border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+                  <span class="sr-only">Next</span>
+                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+              </li>
+            </ul>
+          </nav>
+        </div>
       </div>
     </div>
 
-    <PessoasModal 
-      ref="modalRef"
-      @save="salvar"
-      @delete="deletar"
-    />
+    <PessoasModal ref="modalRef" @save="salvar" @delete="deletar" />
   </section>
 </template>
 
@@ -133,12 +156,70 @@ const pessoas = ref([
     tipo: 'juridica',
     telefone: '(11) 3333-4444',
     email: 'contato@techsolutions.com.br'
+  },
+  {
+    id: 4,
+    nome: 'Carlos Oliveira',
+    cpf: '456.789.123-00',
+    tipo: 'fisica',
+    telefone: '(21) 99999-8888',
+    email: 'carlos.oliveira@email.com'
+  },
+  {
+    id: 5,
+    nome: 'Innovate Corp',
+    cpf: '98.765.432/0001-10',
+    tipo: 'juridica',
+    telefone: '(11) 2222-3333',
+    email: 'contato@innovate.com.br'
+  },
+  {
+    id: 6,
+    nome: 'Ana Pereira',
+    cpf: '321.654.987-00',
+    tipo: 'fisica',
+    telefone: '(21) 98888-7777',
+    email: 'ana.pereira@email.com'
+  },
+  {
+    id: 7,
+    nome: 'Global Tech LTDA',
+    cpf: '23.456.789/0001-12',
+    tipo: 'juridica',
+    telefone: '(11) 4444-5555',
+    email: 'contato@globaltech.com.br'
+  },
+  {
+    id: 8,
+    nome: 'Ricardo Almeida',
+    cpf: '654.321.987-00',
+    tipo: 'fisica',
+    telefone: '(31) 97777-6666',
+    email: 'ricardo.almeida@email.com'
+  },
+  {
+    id: 9,
+    nome: 'Creative Solutions LTDA',
+    cpf: '34.567.890/0001-23',
+    tipo: 'juridica',
+    telefone: '(41) 3333-2222',
+    email: 'contato@creative.com.br'
+  },
+  {
+    id: 10,
+    nome: 'Patrícia Lima',
+    cpf: '789.123.456-00',
+    tipo: 'fisica',
+    telefone: '(51) 96666-5555',
+    email: 'patricia.lima@email.com'
   }
 ])
 
+const currentPage = ref(1)
+const itemsPerPage = 5 
+
 const filteredPessoas = computed(() => {
   if (!search.value) return pessoas.value
-  
   const searchLower = search.value.toLowerCase()
   return pessoas.value.filter(p =>
     p.nome.toLowerCase().includes(searchLower) ||
@@ -147,26 +228,35 @@ const filteredPessoas = computed(() => {
   )
 })
 
-function abrirModalCriar() {
-  modalRef.value.openModal()
+const totalPages = computed(() => Math.ceil(filteredPessoas.value.length / itemsPerPage))
+
+const paginatedPessoas = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage
+  return filteredPessoas.value.slice(start, start + itemsPerPage)
+})
+
+const startItem = computed(() => ((currentPage.value - 1) * itemsPerPage) + 1)
+const endItem = computed(() => Math.min(currentPage.value * itemsPerPage, filteredPessoas.value.length))
+
+function goToPage(page) {
+  currentPage.value = page
 }
 
-function abrirModalEditar(pessoa) {
-  modalRef.value.openModal(pessoa)
+function prevPage() {
+  if (currentPage.value > 1) currentPage.value--
 }
 
+function nextPage() {
+  if (currentPage.value < totalPages.value) currentPage.value++
+}
+
+function abrirModalCriar() { modalRef.value.openModal() }
+function abrirModalEditar(pessoa) { modalRef.value.openModal(pessoa) }
 function salvar(pessoa) {
   const index = pessoas.value.findIndex(p => p.id === pessoa.id)
-  
-  if (index !== -1) {
-
-    pessoas.value[index] = pessoa
-  } else {
-
-    pessoas.value.push(pessoa)
-  }
+  if (index !== -1) pessoas.value[index] = pessoa
+  else pessoas.value.push(pessoa)
 }
-
 function deletar(id) {
   if (confirm('Tem certeza que deseja excluir?')) {
     pessoas.value = pessoas.value.filter(p => p.id !== id)
