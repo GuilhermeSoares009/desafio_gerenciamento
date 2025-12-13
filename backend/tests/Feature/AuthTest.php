@@ -1,10 +1,15 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Tests\TestCase;
+
+uses(TestCase::class, RefreshDatabase::class);
 
 beforeEach(function () {
-    $this->user = User::factory()->create([
+    $this->user = User::create([
+        'name' => 'Test User',
         'email' => 'test@example.com',
         'password' => Hash::make('password123'),
     ]);
