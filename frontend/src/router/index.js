@@ -1,8 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Login from '../views/Login.vue'
-import Dashboard from '../views/Dashboard.vue'
-import PessoasIndex from '../views/pessoas/Index.vue'
-import PessoasForm from '../views/pessoas/Form.vue'
+import Sidebar from '../views/Sidebar.vue'
+import PessoasLista from '../views/pessoas/List.vue'
 
 const routes = [
   {
@@ -12,7 +11,7 @@ const routes = [
   },
   {
     path: '/',
-    component: Dashboard,
+    component: Sidebar, 
     children: [
       {
         path: '',
@@ -20,19 +19,9 @@ const routes = [
       },
       {
         path: 'pessoas',
-        name: 'PessoasIndex',
-        component: PessoasIndex
+        name: 'PessoasLista',
+        component: PessoasLista
       },
-      {
-        path: 'pessoas/criar',
-        name: 'PessoasCriar',
-        component: PessoasForm
-      },
-      {
-        path: 'pessoas/:id/editar',
-        name: 'PessoasEditar',
-        component: PessoasForm
-      }
     ]
   }
 ]
