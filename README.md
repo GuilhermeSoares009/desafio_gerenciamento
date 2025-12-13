@@ -13,7 +13,7 @@ Este é um projeto de teste técnico para uma vaga de desenvolvedor, implementan
 
 1. **Clone o repositório**:
    ```bash
-   git clone <url-do-repositorio>
+   git clone https://github.com/GuilhermeSoares009/desafio_gerenciamento
    cd desafio_gerenciamento
    ```
 
