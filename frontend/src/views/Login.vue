@@ -77,10 +77,15 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
+
+const CREDENCIAIS_MOCK = {
+  email: 'admin@sistema.com',
+  password: '123456'
+}
 
 const form = ref({
   email: '',
@@ -88,10 +93,12 @@ const form = ref({
   remember: false,
 })
 
-const CREDENCIAIS_MOCK = {
-  email: 'admin@sistema.com',
-  password: '123456'
-}
+// Preencher os campos ao carregar o componente
+onMounted(() => {
+  form.value.email = CREDENCIAIS_MOCK.email
+  form.value.password = CREDENCIAIS_MOCK.password
+})
+
 
 function handleLogin() {
 
