@@ -26,9 +26,12 @@ Este é um projeto de teste técnico para uma vaga de desenvolvedor, implementan
    - Frontend: http://localhost:5173
    - Backend API: http://localhost:8000
 
-4. **Credenciais de login** (mock):
+4. **Credenciais de login**:
    - Email: admin@sistema.com
    - Senha: 123456
+
+5. **Documentação da APi**:
+   - Swagger: http://localhost:8000/docs
 
 ## Funcionalidades
 - Login simples (mock)
