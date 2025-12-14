@@ -1,39 +1,80 @@
-# desafio_gerenciamento
-Desafio de gerenciamento de pessoas utilizando Vue + Laravel + Docker
+# Sistema de Gerenciamento de Pessoas
 
-Este é um projeto de teste técnico para uma vaga de desenvolvedor, implementando um sistema simples de gerenciamento de pessoas (física e jurídica). O frontend é desenvolvido em Vue.js e o backend em Laravel, com containerização via Docker.
+Sistema web para cadastro de pessoas físicas e jurídicas desenvolvido com Laravel + Vue.js + Docker.
 
-## Tecnologias Utilizadas
-- **Frontend**: Vue.js
-- **Backend**: Laravel (PHP)
-- **Banco de Dados**: MySQL
-- **Containerização**: Docker e Docker Compose
+## 🚀 Como Rodar
 
-## Como Rodar o Projeto
+### 1. Clone o repositório
+```bash
+git clone https://github.com/GuilhermeSoares009/desafio_gerenciamento
+cd desafio_gerenciamento
+```
 
-1. **Clone o repositório**:
-   ```bash
-   git clone https://github.com/GuilhermeSoares009/desafio_gerenciamento
-   cd desafio_gerenciamento
-   ```
+### 2. Configure o backend
+```bash
+cd backend
+cp .env.example .env
+cd ..
+```
 
-2. **Suba os containers com Docker Compose**:
-   ```bash
-   docker-compose up --build
-   ```
+**Windows (PowerShell como Administrador):**
+```powershell
+icacls backend\storage /grant Everyone:F /T
+icacls backend\bootstrap\cache /grant Everyone:F /T
+```
 
-3. **Acesse a aplicação**:
-   - Frontend: http://localhost:5173
-   - Backend API: http://localhost:8000
+**Linux/Mac:**
+```bash
+chmod -R 777 backend/storage backend/bootstrap/cache
+```
 
-4. **Credenciais de login**:
-   - Email: admin@sistema.com
-   - Senha: 123456
+### 3. Suba os containers
+```bash
+docker compose up -d --build
+```
 
-5. **Documentação da APi**:
-   - Swagger: http://localhost:8000/docs
+### 4. Configure o banco 
+```bash
+docker exec -it app_backend bash -c "composer install && php artisan key:generate && php artisan migrate:fresh --seed && php artisan l5-swagger:generate"
+```
 
-## Funcionalidades
-- Login simples (mock)
-- Listagem, criação, edição e exclusão de pessoas (física/jurídica)
-- API REST com autenticação via Sanctum
+### 5. Instale dependências do frontend
+```bash
+docker exec -it app_frontend sh -c "npm install"
+```
+
+## 🌐 Acessos
+
+- **Frontend**: http://localhost:5173
+- **API**: http://localhost:8000/api
+- **Swagger**: http://localhost:8000/api/documentation
+
+**Credenciais:**
+- Email: `admin@sistema.com`
+- Senha: `123456`
+
+## 🧪 Rodar Testes
+```bash
+docker exec -it app_backend bash -c "php artisan test"
+```
+
+## 📦 Tecnologias
+
+**Backend:** Laravel 11, MySQL 8, Sanctum, PEST, Swagger  
+**Frontend:** Vue 3, Vite, Tailwind, Flowbite  
+**Infra:** Docker, Nginx, PHP 8.2
+
+## 🛠️ Comandos Úteis
+```bash
+# Ver logs
+docker compose logs -f
+
+# Parar containers
+docker compose down
+
+# Resetar banco de dados
+docker exec -it app_backend bash -c "php artisan migrate:fresh --seed"
+
+# Reconstruir tudo
+docker compose down && docker compose up -d --build
+```

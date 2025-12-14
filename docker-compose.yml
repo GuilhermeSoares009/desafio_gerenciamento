@@ -21,11 +21,11 @@ services:
       timeout: 5s
       retries: 5
 
-  php:
+  backend:
     build:
       context: ./docker/php
       dockerfile: Dockerfile
-    container_name: app_php
+    container_name: app_backend
     working_dir: /var/www/html
     volumes:
       - ./backend:/var/www/html
@@ -35,7 +35,6 @@ services:
       mysql:
         condition: service_healthy
 
-  # Nginx
   nginx:
     image: nginx:alpine
     container_name: app_nginx
@@ -45,7 +44,7 @@ services:
       - ./backend:/var/www/html
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
     depends_on:
-      - php
+      - backend
     networks:
       - app_network
 
