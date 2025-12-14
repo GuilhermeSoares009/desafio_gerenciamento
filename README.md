@@ -17,17 +17,6 @@ cp .env.example .env
 cd ..
 ```
 
-**Windows (PowerShell como Administrador):**
-```powershell
-icacls backend\storage /grant Everyone:F /T
-icacls backend\bootstrap\cache /grant Everyone:F /T
-```
-
-**Linux/Mac:**
-```bash
-chmod -R 777 backend/storage backend/bootstrap/cache
-```
-
 ### 3. Suba os containers
 ```bash
 docker compose up -d --build
