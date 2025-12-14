@@ -13,7 +13,7 @@ class Pessoa extends Model
 
     protected $fillable = [
         'nome',
-        'cpf',
+        'documento',
         'tipo',
         'telefone',
         'email',

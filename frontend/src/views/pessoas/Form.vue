@@ -1,6 +1,5 @@
 <template>
   <div>
-
     <div v-if="showButton" class="flex justify-center m-5">
       <button
         @click="openModal()"
@@ -21,13 +20,11 @@
     >
       <div class="relative p-4 w-full max-w-2xl">
         <div class="bg-white rounded-lg shadow dark:bg-gray-800 p-6">
-
           <div class="flex justify-between items-center pb-4 mb-4
                       border-b dark:border-gray-600">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
               {{ isEdit ? 'Editar Pessoa' : 'Nova Pessoa' }}
             </h3>
-
             <button
               @click="closeModal"
               class="text-gray-400 hover:bg-gray-200 rounded-lg p-1.5
@@ -38,9 +35,8 @@
           </div>
 
           <!-- Form -->
-          <form @submit.prevent="submit">
+          <form @submit.prevent="submitForm">
             <div class="grid gap-4 mb-4 sm:grid-cols-2">
-
               <div class="sm:col-span-2">
                 <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                   Nome Completo *
@@ -48,22 +44,9 @@
                 <input
                   v-model="form.nome"
                   type="text"
-                  required
-                  class="input"
                   placeholder="João Silva ou Empresa LTDA"
-                />
-              </div>
-
-              <div>
-                <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                  CPF/CNPJ *
-                </label>
-                <input
-                  v-model="form.cpf"
-                  type="text"
+                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                   required
-                  class="input"
-                  placeholder="000.000.000-00"
                 />
               </div>
 
@@ -71,79 +54,83 @@
                 <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                   Tipo *
                 </label>
-                <select 
-                  v-model="form.tipo" 
+                <select
+                  v-model="form.tipo"
+                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                   required
-                  class="input"
                 >
                   <option value="fisica">Pessoa Física</option>
                   <option value="juridica">Pessoa Jurídica</option>
                 </select>
               </div>
 
-              <div>
+              <div v-if="form.tipo === 'fisica'">
                 <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                  Telefone *
+                  CPF
                 </label>
                 <input
-                  v-model="form.telefone"
+                  v-model="form.documento"
                   type="text"
+                  placeholder="000.000.000-00"
+                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                   required
-                  class="input"
-                  placeholder="(11) 98765-4321"
+                />
+              </div>
+
+              <div v-if="form.tipo === 'juridica'">
+                <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                  Documento (CNPJ) *
+                </label>
+                <input
+                  v-model="form.documento"
+                  type="text"
+                  placeholder="00.000.000/0000-00"
+                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  required
                 />
               </div>
 
               <div>
                 <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                  Email *
+                  Email
                 </label>
                 <input
                   v-model="form.email"
                   type="email"
-                  required
-                  class="input"
                   placeholder="email@exemplo.com"
+                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 />
               </div>
 
+              <div>
+                <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                  Telefone
+                </label>
+                <input
+                  v-model="form.telefone"
+                  type="text"
+                  placeholder="(00) 00000-0000"
+                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                />
+              </div>
             </div>
 
-            <div class="flex items-center justify-between">
-              <div class="flex gap-3">
-                <button
-                  type="submit"
-                  class="text-white bg-blue-700 hover:bg-blue-800
-                         px-5 py-2.5 rounded-lg text-sm font-medium"
-                >
-                  {{ isEdit ? 'Atualizar' : 'Cadastrar' }}
-                </button>
-
-                <button
-                  type="button"
-                  @click="closeModal"
-                  class="text-gray-900 bg-white border border-gray-300
-                         hover:bg-gray-100 px-5 py-2.5 rounded-lg text-sm
-                         dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600
-                         dark:hover:bg-gray-700"
-                >
-                  Cancelar
-                </button>
-              </div>
-
+            <div class="flex justify-end gap-2">
               <button
-                v-if="isEdit"
                 type="button"
-                @click="deletar"
-                class="text-red-600 border border-red-600
-                       hover:bg-red-600 hover:text-white
-                       px-5 py-2.5 rounded-lg text-sm font-medium"
+                @click="closeModal"
+                class="px-5 py-2.5 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700"
               >
-                Excluir
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                class="px-5 py-2.5 text-sm font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800"
+              >
+                {{ isEdit ? 'Atualizar' : 'Salvar' }}
               </button>
             </div>
           </form>
-
         </div>
       </div>
     </div>
@@ -154,55 +141,73 @@
 import { ref, watch } from 'vue'
 import axios from 'axios'
 
-const props = defineProps(['pessoa'])
-const emit = defineEmits(['close'])
+const emit = defineEmits(['save', 'delete'])
+
+const isOpen = ref(false)
+const isEdit = ref(false)
+const pessoaEdit = ref(null)
 
 const form = ref({
   nome: '',
   email: '',
   telefone: '',
   tipo: 'fisica',
-  cpf: '',
-  cnpj: '',
-  razao_social: ''
+  documento: ''  
 })
 
-watch(() => props.pessoa, (newPessoa) => {
+watch(() => pessoaEdit.value, (newPessoa) => {
   if (newPessoa) {
     form.value = { ...newPessoa }
+    isEdit.value = true
   } else {
     form.value = {
       nome: '',
       email: '',
       telefone: '',
       tipo: 'fisica',
-      cpf: '',
-      cnpj: '',
-      razao_social: ''
+      documento: ''  
     }
+    isEdit.value = false
   }
 }, { immediate: true })
+
+const openModal = (pessoa = null) => {
+  pessoaEdit.value = pessoa
+  isOpen.value = true
+}
+
+const closeModal = () => {
+  isOpen.value = false
+  pessoaEdit.value = null
+  emit('close')
+}
 
 const submitForm = async () => {
   try {
     const token = localStorage.getItem('token')
-    const url = props.pessoa ? `/pessoas/${props.pessoa.id}` : '/pessoas'
-    const method = props.pessoa ? 'put' : 'post'
-    await axios[method](url, form.value, {
+    const url = pessoaEdit.value ? `/pessoas/${pessoaEdit.value.id}` : '/pessoas'
+    const method = pessoaEdit.value ? 'put' : 'post'
+
+    const payload = {
+      nome: form.value.nome,
+      email: form.value.email,
+      telefone: form.value.telefone,
+      tipo: form.value.tipo,
+      documento: form.value.documento  
+    }
+
+    const response = await axios[method](url, payload, {
       headers: { Authorization: `Bearer ${token}` }
     })
-    emit('close')
+    emit('save', response.data)
+    closeModal()
   } catch (err) {
     console.error('Erro ao salvar pessoa:', err)
+    if (err.response && err.response.status === 422) {
+      console.log('Erros de validação:', err.response.data.errors)
+    }
   }
 }
-</script>
 
-<style scoped>
-.input {
-  @apply bg-gray-50 border border-gray-300 text-sm rounded-lg
-         block w-full p-2.5 text-gray-900
-         dark:bg-gray-700 dark:border-gray-600 dark:text-white
-         focus:ring-blue-500 focus:border-blue-500;
-}
-</style>
+defineExpose({ openModal })
+</script>

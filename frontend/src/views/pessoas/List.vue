@@ -50,7 +50,7 @@
                 class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
               >
                 <td class="px-4 py-3 font-medium text-gray-900 dark:text-white">{{ pessoa.nome }}</td>
-                <td class="px-4 py-3">{{ pessoa.cpf }}</td>
+                <td class="px-4 py-3">{{ pessoa.documento }}</td>
                 <td class="px-4 py-3">
                   <span 
                     class="px-2 py-1 text-xs font-medium rounded"
@@ -188,7 +188,7 @@ const filteredPessoas = computed(() => {
   const searchLower = search.value.toLowerCase()
   return pessoas.value.filter(p =>
     p.nome.toLowerCase().includes(searchLower) ||
-    p.cpf.includes(searchLower) ||
+    p.documento.includes(searchLower) ||
     p.email.toLowerCase().includes(searchLower)
   )
 })

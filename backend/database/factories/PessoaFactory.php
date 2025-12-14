@@ -13,7 +13,7 @@ class PessoaFactory extends Factory
     {
         return [
             'nome' => $this->faker->name(),
-            'cpf' => $this->faker->numerify('###.###.###-##'),
+            'documento' => $this->faker->numerify('###.###.###-##'),
             'tipo' => $this->faker->randomElement(['fisica', 'juridica']),
             'telefone' => $this->faker->phoneNumber(),
             'email' => $this->faker->unique()->safeEmail(),

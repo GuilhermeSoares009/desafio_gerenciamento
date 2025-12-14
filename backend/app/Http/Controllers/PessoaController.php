@@ -48,7 +48,7 @@ class PessoaController extends Controller
     {
         $validated = $request->validate([
             'nome' => 'required|string|max:255',
-            'cpf' => 'required|string|unique:pessoas,cpf',
+            'documento' => 'required|string|unique:pessoas,documento',
             'tipo' => 'required|in:fisica,juridica',
             'telefone' => 'required|string',
             'email' => 'required|email',
@@ -99,7 +99,7 @@ class PessoaController extends Controller
     {
         $validated = $request->validate([
             'nome' => 'sometimes|required|string|max:255',
-            'cpf' => 'sometimes|required|string|unique:pessoas,cpf,' . $pessoa->id,
+            'documento' => 'sometimes|required|string|unique:pessoas,documento,' . $pessoa->id,
             'tipo' => 'sometimes|required|in:fisica,juridica',
             'telefone' => 'sometimes|required|string',
             'email' => 'sometimes|required|email',
