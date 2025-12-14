@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Pessoa;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class PessoaController extends Controller
 {
@@ -18,6 +19,7 @@ class PessoaController extends Controller
      */
     public function index()
     {
+        Log::info('Usuário autenticado: ' . auth()->user()->email);
         return Pessoa::all();
     }
 

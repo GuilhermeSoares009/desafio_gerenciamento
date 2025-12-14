@@ -151,75 +151,51 @@
 </template>
 
 <script setup>
-import { ref, defineProps, defineEmits } from 'vue'
+import { ref, watch } from 'vue'
+import axios from 'axios'
 
-const props = defineProps({
-  showButton: {
-    type: Boolean,
-    default: false
-  },
-  pessoa: {
-    type: Object,
-    default: null
-  }
-})
-
-const emit = defineEmits(['save', 'delete', 'close'])
-
-const isOpen = ref(false)
-const isEdit = ref(false)
+const props = defineProps(['pessoa'])
+const emit = defineEmits(['close'])
 
 const form = ref({
-  id: null,
   nome: '',
-  cpf: '',
-  tipo: 'fisica',
+  email: '',
   telefone: '',
-  email: ''
+  tipo: 'fisica',
+  cpf: '',
+  cnpj: '',
+  razao_social: ''
 })
 
-function openModal(pessoa = null) {
-  if (pessoa) {
-
-    isEdit.value = true
-    form.value = { ...pessoa }
+watch(() => props.pessoa, (newPessoa) => {
+  if (newPessoa) {
+    form.value = { ...newPessoa }
   } else {
-
-    isEdit.value = false
     form.value = {
-      id: null,
       nome: '',
-      cpf: '',
-      tipo: 'fisica',
+      email: '',
       telefone: '',
-      email: ''
+      tipo: 'fisica',
+      cpf: '',
+      cnpj: '',
+      razao_social: ''
     }
   }
-  isOpen.value = true
-}
+}, { immediate: true })
 
-function closeModal() {
-  isOpen.value = false
-  emit('close')
-}
-
-function submit() {
-  if (isEdit.value) {
-    emit('save', { ...form.value }) 
-  } else {
-    emit('save', { ...form.value, id: Date.now() }) 
-  }
-  closeModal()
-}
-
-function deletar() {
-  if (confirm('Tem certeza que deseja excluir esta pessoa?')) {
-    emit('delete', form.value.id)
-    closeModal()
+const submitForm = async () => {
+  try {
+    const token = localStorage.getItem('token')
+    const url = props.pessoa ? `/pessoas/${props.pessoa.id}` : '/pessoas'
+    const method = props.pessoa ? 'put' : 'post'
+    await axios[method](url, form.value, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    emit('close')
+  } catch (err) {
+    console.error('Erro ao salvar pessoa:', err)
   }
 }
-
-defineExpose({ openModal })
 </script>
 
 <style scoped>

@@ -16,7 +16,7 @@
 
           <form
             class="space-y-4 md:space-y-6"
-            @submit.prevent="handleLogin"
+            @submit.prevent="login"
           >
             <div>
               <label
@@ -28,7 +28,7 @@
               <input
                 id="email"
                 type="email"
-                v-model="form.email"
+                v-model="email"
                 placeholder="name@company.com"
                 required
                 class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg
@@ -48,7 +48,7 @@
               <input
                 id="password"
                 type="password"
-                v-model="form.password"
+                v-model="password"
                 placeholder="••••••••"
                 required
                 class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg
@@ -69,6 +69,7 @@
               Entrar
             </button>
 
+            <p v-if="error" class="text-red-500 text-xs italic">{{ error }}</p>
           </form>
         </div>
       </div>
@@ -77,44 +78,25 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import axios from 'axios'
 
 const router = useRouter()
+const email = ref('admin@sistema.com')
+const password = ref('123456')
+const error = ref('')
 
-const CREDENCIAIS_MOCK = {
-  email: 'admin@sistema.com',
-  password: '123456'
-}
-
-const form = ref({
-  email: '',
-  password: '',
-  remember: false,
-})
-
-// Preencher os campos ao carregar o componente
-onMounted(() => {
-  form.value.email = CREDENCIAIS_MOCK.email
-  form.value.password = CREDENCIAIS_MOCK.password
-})
-
-
-function handleLogin() {
-
-  if (form.value.email === CREDENCIAIS_MOCK.email && 
-      form.value.password === CREDENCIAIS_MOCK.password) {
-    
-    localStorage.setItem('token', 'mock-token-123')
-    localStorage.setItem('user', JSON.stringify({
-      email: form.value.email,
-      nome: 'Administrador'
-    }))
-
+const login = async () => {
+  try {
+    const response = await axios.post('/login', {
+      email: email.value,
+      password: password.value
+    })
+    localStorage.setItem('token', response.data.access_token)
     router.push('/pessoas')
-    
-  } else {
-    alert('❌ Email ou senha incorretos!\n\nUse:\nEmail: admin@sistema.com\nSenha: 123456')
+  } catch (err) {
+    error.value = 'Credenciais inválidas'
   }
 }
 </script>

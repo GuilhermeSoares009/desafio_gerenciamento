@@ -126,94 +126,59 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import axios from 'axios'
 import PessoasModal from './Form.vue'
 
 const modalRef = ref(null)
 const search = ref('')
 
-const pessoas = ref([
-  {
-    id: 1,
-    nome: 'João Silva',
-    cpf: '123.456.789-00',
-    tipo: 'fisica',
-    telefone: '(11) 98765-4321',
-    email: 'joao.silva@email.com'
-  },
-  {
-    id: 2,
-    nome: 'Maria Santos',
-    cpf: '987.654.321-00',
-    tipo: 'fisica',
-    telefone: '(11) 91234-5678',
-    email: 'maria.santos@email.com'
-  },
-  {
-    id: 3,
-    nome: 'Tech Solutions LTDA',
-    cpf: '12.345.678/0001-90',
-    tipo: 'juridica',
-    telefone: '(11) 3333-4444',
-    email: 'contato@techsolutions.com.br'
-  },
-  {
-    id: 4,
-    nome: 'Carlos Oliveira',
-    cpf: '456.789.123-00',
-    tipo: 'fisica',
-    telefone: '(21) 99999-8888',
-    email: 'carlos.oliveira@email.com'
-  },
-  {
-    id: 5,
-    nome: 'Innovate Corp',
-    cpf: '98.765.432/0001-10',
-    tipo: 'juridica',
-    telefone: '(11) 2222-3333',
-    email: 'contato@innovate.com.br'
-  },
-  {
-    id: 6,
-    nome: 'Ana Pereira',
-    cpf: '321.654.987-00',
-    tipo: 'fisica',
-    telefone: '(21) 98888-7777',
-    email: 'ana.pereira@email.com'
-  },
-  {
-    id: 7,
-    nome: 'Global Tech LTDA',
-    cpf: '23.456.789/0001-12',
-    tipo: 'juridica',
-    telefone: '(11) 4444-5555',
-    email: 'contato@globaltech.com.br'
-  },
-  {
-    id: 8,
-    nome: 'Ricardo Almeida',
-    cpf: '654.321.987-00',
-    tipo: 'fisica',
-    telefone: '(31) 97777-6666',
-    email: 'ricardo.almeida@email.com'
-  },
-  {
-    id: 9,
-    nome: 'Creative Solutions LTDA',
-    cpf: '34.567.890/0001-23',
-    tipo: 'juridica',
-    telefone: '(41) 3333-2222',
-    email: 'contato@creative.com.br'
-  },
-  {
-    id: 10,
-    nome: 'Patrícia Lima',
-    cpf: '789.123.456-00',
-    tipo: 'fisica',
-    telefone: '(51) 96666-5555',
-    email: 'patricia.lima@email.com'
+const pessoas = ref([])
+const showModal = ref(false)
+const editingPessoa = ref(null)
+
+const fetchPessoas = async () => {
+  const token = localStorage.getItem('token')
+  if (!token) {
+    console.error('Token não encontrado')
+    return
   }
-])
+  try {
+    const response = await axios.get('/pessoas', {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    pessoas.value = response.data
+  } catch (err) {
+    console.error('Erro ao buscar pessoas:', err.response?.status, err.response?.data)
+  }
+}
+
+onMounted(fetchPessoas)
+
+const openModal = (pessoa = null) => {
+  editingPessoa.value = pessoa
+  showModal.value = true
+}
+
+const closeModal = () => {
+  showModal.value = false
+  editingPessoa.value = null
+  fetchPessoas()
+}
+
+const deletePessoa = async (id) => {
+  if (confirm('Tem certeza que deseja excluir?')) {
+    try {
+      const token = localStorage.getItem('token')
+      await axios.delete(`/pessoas/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      fetchPessoas()
+    } catch (err) {
+      console.error('Erro ao excluir pessoa:', err)
+    }
+  }
+}
 
 const currentPage = ref(1)
 const itemsPerPage = 5 
