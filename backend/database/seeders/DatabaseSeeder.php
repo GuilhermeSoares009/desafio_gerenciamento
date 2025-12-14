@@ -19,25 +19,25 @@ class DatabaseSeeder extends Seeder
 
         Pessoa::create([
             'nome' => 'João Silva',
-            'documento' => '123.456.789-00', 
+            'documento' => '12345678900',
             'tipo' => 'fisica',
-            'telefone' => '(11) 98765-4321',
+            'telefone' => '11987654321',  
             'email' => 'joao.silva@email.com',
         ]);
 
         Pessoa::create([
             'nome' => 'Maria Santos',
-            'documento' => '987.654.321-00', 
+            'documento' => '98765432100',  
             'tipo' => 'fisica',
-            'telefone' => '(11) 91234-5678',
+            'telefone' => '11912345678',  
             'email' => 'maria.santos@email.com',
         ]);
 
         Pessoa::create([
             'nome' => 'Tech Solutions LTDA',
-            'documento' => '12.345.678/0001-90', 
+            'documento' => '12345678000190',  
             'tipo' => 'juridica',
-            'telefone' => '(11) 3333-4444',
+            'telefone' => '1133334444',  
             'email' => 'contato@techsolutions.com.br',
         ]);
     }

@@ -46,13 +46,23 @@ class PessoaController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $rules = [
             'nome' => 'required|string|max:255',
-            'documento' => 'required|string|unique:pessoas,documento',
             'tipo' => 'required|in:fisica,juridica',
             'telefone' => 'required|string',
             'email' => 'required|email',
-        ]);
+        ];
+
+        if ($request->tipo === 'fisica') {
+            $rules['documento'] = 'required|string|size:11|unique:pessoas,documento';
+        } else {
+            $rules['documento'] = 'required|string|size:14|unique:pessoas,documento';
+        }
+
+        $validated = $request->validate($rules);
+
+        $validated['documento'] = preg_replace('/\D/', '', $validated['documento']);
+        $validated['telefone'] = preg_replace('/\D/', '', $validated['telefone']);
 
         $pessoa = Pessoa::create($validated);
 
@@ -97,13 +107,28 @@ class PessoaController extends Controller
      */
     public function update(Request $request, Pessoa $pessoa)
     {
-        $validated = $request->validate([
+        $rules = [
             'nome' => 'sometimes|required|string|max:255',
-            'documento' => 'sometimes|required|string|unique:pessoas,documento,' . $pessoa->id,
             'tipo' => 'sometimes|required|in:fisica,juridica',
             'telefone' => 'sometimes|required|string',
             'email' => 'sometimes|required|email',
-        ]);
+        ];
+
+        $tipo = $request->tipo ?? $pessoa->tipo;
+        if ($tipo === 'fisica') {
+            $rules['documento'] = 'sometimes|required|string|size:11|unique:pessoas,documento,' . $pessoa->id;
+        } else {
+            $rules['documento'] = 'sometimes|required|string|size:14|unique:pessoas,documento,' . $pessoa->id;
+        }
+
+        $validated = $request->validate($rules);
+
+        if (isset($validated['documento'])) {
+            $validated['documento'] = preg_replace('/\D/', '', $validated['documento']);
+        }
+        if (isset($validated['telefone'])) {
+            $validated['telefone'] = preg_replace('/\D/', '', $validated['telefone']);
+        }
 
         $pessoa->update($validated);
 

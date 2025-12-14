@@ -9,7 +9,7 @@
             <input
               v-model="search"
               type="text"
-              placeholder="Buscar por nome, CPF ou email..."
+              placeholder="Buscar por nome, documento ou email..."
               class="bg-gray-50 border border-gray-300 text-sm rounded-lg block w-full pl-3 p-2
                      dark:bg-gray-700 dark:border-gray-600 dark:text-white"
             />
@@ -50,7 +50,7 @@
                 class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
               >
                 <td class="px-4 py-3 font-medium text-gray-900 dark:text-white">{{ pessoa.nome }}</td>
-                <td class="px-4 py-3">{{ pessoa.documento }}</td>
+                <td class="px-4 py-3">{{ formatDocumento(pessoa) }}</td>
                 <td class="px-4 py-3">
                   <span 
                     class="px-2 py-1 text-xs font-medium rounded"
@@ -61,11 +61,11 @@
                     {{ pessoa.tipo === 'fisica' ? 'Física' : 'Jurídica' }}
                   </span>
                 </td>
-                <td class="px-4 py-3">{{ pessoa.telefone }}</td>
+                <td class="px-4 py-3">{{ formatTelefoneDisplay(pessoa) }}</td>
                 <td class="px-4 py-3">{{ pessoa.email }}</td>
                 <td class="px-4 py-3 text-right">
                   <button @click="abrirModalEditar(pessoa)" class="text-blue-600 hover:underline mr-3">✏️ Editar</button>
-                  <button @click="deletar(pessoa.id)" class="text-red-600 hover:underline">🗑️ Excluir</button>
+                  <button @click="deletePessoa(pessoa.id)" class="text-red-600 hover:underline">🗑️ Excluir</button>
                 </td>
               </tr>
 
@@ -121,7 +121,12 @@
       </div>
     </div>
 
-    <PessoasModal ref="modalRef" @save="salvar" @delete="deletar" />
+    <PessoasModal 
+      :isOpen="showModal" 
+      :pessoa="editingPessoa" 
+      @save="salvar" 
+      @close="closeModal"
+    />
   </section>
 </template>
 
@@ -130,12 +135,11 @@ import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 import PessoasModal from './Form.vue'
 
-const modalRef = ref(null)
 const search = ref('')
 
 const pessoas = ref([])
 const showModal = ref(false)
-const editingPessoa = ref(null)
+const editingPessoa = ref(null)  
 
 const fetchPessoas = async () => {
   const token = localStorage.getItem('token')
@@ -215,16 +219,34 @@ function nextPage() {
   if (currentPage.value < totalPages.value) currentPage.value++
 }
 
-function abrirModalCriar() { modalRef.value.openModal() }
-function abrirModalEditar(pessoa) { modalRef.value.openModal(pessoa) }
+function abrirModalCriar() { openModal() }
+function abrirModalEditar(pessoa) { openModal(pessoa) }
 function salvar(pessoa) {
   const index = pessoas.value.findIndex(p => p.id === pessoa.id)
   if (index !== -1) pessoas.value[index] = pessoa
   else pessoas.value.push(pessoa)
 }
-function deletar(id) {
-  if (confirm('Tem certeza que deseja excluir?')) {
-    pessoas.value = pessoas.value.filter(p => p.id !== id)
-  }
+
+const formatCPF = (value) => {
+  return value
+    .replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4')
 }
+
+const formatCNPJ = (value) => {
+  return value
+    .replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5')
+}
+
+const formatTelefone = (value) => {
+  return value
+    .replace(/(\d{2})(\d{4,5})(\d{4})/, '($1) $2-$3')
+}
+
+const formatDocumento = (pessoa) => {
+  if (pessoa.tipo === 'fisica') return formatCPF(pessoa.documento)
+  else return formatCNPJ(pessoa.documento)
+}
+
+const formatTelefoneDisplay = (pessoa) => formatTelefone(pessoa.telefone)
 </script>
+docker exec -it app_backend bash -c "composer install && php artisan key:generate && php artisan migrate:fresh --seed && php artisan l5-swagger:generate"

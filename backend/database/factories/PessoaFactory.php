@@ -11,11 +11,14 @@ class PessoaFactory extends Factory
 {
     public function definition(): array
     {
+        $tipo = $this->faker->randomElement(['fisica', 'juridica']);
         return [
             'nome' => $this->faker->name(),
-            'documento' => $this->faker->numerify('###.###.###-##'),
-            'tipo' => $this->faker->randomElement(['fisica', 'juridica']),
-            'telefone' => $this->faker->phoneNumber(),
+            'documento' => $tipo === 'fisica' 
+                ? $this->faker->numerify('###########') 
+                : $this->faker->numerify('##############'),
+            'tipo' => $tipo,
+            'telefone' => $this->faker->numerify('###########'),
             'email' => $this->faker->unique()->safeEmail(),
         ];
     }

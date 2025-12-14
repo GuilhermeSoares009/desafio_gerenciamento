@@ -1,22 +1,10 @@
 <template>
   <div>
-    <div v-if="showButton" class="flex justify-center m-5">
-      <button
-        @click="openModal()"
-        class="block text-white bg-blue-700 hover:bg-blue-800
-               font-medium rounded-lg text-sm px-5 py-2.5"
-        type="button"
-      >
-        Nova Pessoa
-      </button>
-    </div>
-
     <!-- Modal -->
     <div
-      v-if="isOpen"
-      class="fixed inset-0 z-50 flex items-center justify-center
-             bg-black bg-opacity-50"
-      @click.self="closeModal"
+      v-if="isOpen" 
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+      @click.self="emit('close')"
     >
       <div class="relative p-4 w-full max-w-2xl">
         <div class="bg-white rounded-lg shadow dark:bg-gray-800 p-6">
@@ -26,9 +14,8 @@
               {{ isEdit ? 'Editar Pessoa' : 'Nova Pessoa' }}
             </h3>
             <button
-              @click="closeModal"
-              class="text-gray-400 hover:bg-gray-200 rounded-lg p-1.5
-                     dark:hover:bg-gray-600"
+              @click="emit('close')"
+              class="text-gray-400 hover:bg-gray-200 rounded-lg p-1.5 dark:hover:bg-gray-600"
             >
               ✕
             </button>
@@ -70,6 +57,7 @@
                 </label>
                 <input
                   v-model="form.documento"
+                  @input="handleDocumentoInput"
                   type="text"
                   placeholder="000.000.000-00"
                   class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
@@ -83,6 +71,7 @@
                 </label>
                 <input
                   v-model="form.documento"
+                  @input="handleDocumentoInput"
                   type="text"
                   placeholder="00.000.000/0000-00"
                   class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
@@ -108,6 +97,7 @@
                 </label>
                 <input
                   v-model="form.telefone"
+                  @input="handleTelefoneInput"
                   type="text"
                   placeholder="(00) 00000-0000"
                   class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
@@ -116,9 +106,10 @@
             </div>
 
             <div class="flex justify-end gap-2">
+              <p v-if="error" class="text-red-500 text-xs italic mr-2">{{ error }}</p>
               <button
                 type="button"
-                @click="closeModal"
+                @click="emit('close')"
                 class="px-5 py-2.5 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700"
               >
                 Cancelar
@@ -141,23 +132,26 @@
 import { ref, watch } from 'vue'
 import axios from 'axios'
 
-const emit = defineEmits(['save', 'delete'])
+const props = defineProps(['isOpen', 'pessoa'])
+const emit = defineEmits(['save']) 
 
-const isOpen = ref(false)
 const isEdit = ref(false)
-const pessoaEdit = ref(null)
 
 const form = ref({
   nome: '',
   email: '',
   telefone: '',
   tipo: 'fisica',
-  documento: ''  
+  documento: ''
 })
 
-watch(() => pessoaEdit.value, (newPessoa) => {
+const error = ref('')
+
+watch(() => props.pessoa, (newPessoa) => {
   if (newPessoa) {
     form.value = { ...newPessoa }
+    handleDocumentoInput() 
+    handleTelefoneInput() 
     isEdit.value = true
   } else {
     form.value = {
@@ -165,49 +159,107 @@ watch(() => pessoaEdit.value, (newPessoa) => {
       email: '',
       telefone: '',
       tipo: 'fisica',
-      documento: ''  
+      documento: ''
     }
     isEdit.value = false
   }
 }, { immediate: true })
 
-const openModal = (pessoa = null) => {
-  pessoaEdit.value = pessoa
-  isOpen.value = true
+
+const formatCPF = (value) => {
+  return value
+    .replace(/\D/g, '')
+    .replace(/(\d{3})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d{1,2})$/, '$1-$2')
+    .slice(0, 14)
 }
 
-const closeModal = () => {
-  isOpen.value = false
-  pessoaEdit.value = null
-  emit('close')
+const formatCNPJ = (value) => {
+  return value
+    .replace(/\D/g, '')
+    .replace(/(\d{2})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d)/, '$1/$2')
+    .replace(/(\d{4})(\d{1,2})$/, '$1-$2')
+    .slice(0, 18)
+}
+
+const formatTelefone = (value) => {
+  return value
+    .replace(/\D/g, '')
+    .replace(/(\d{2})(\d)/, '($1) $2')
+    .replace(/(\d{4,5})(\d{4})$/, '$1-$2')
+    .slice(0, 15)
+}
+
+const handleDocumentoInput = () => {
+  if (form.value.tipo === 'fisica') {
+    form.value.documento = formatCPF(form.value.documento)
+  } else {
+    form.value.documento = formatCNPJ(form.value.documento)
+  }
+}
+
+const handleTelefoneInput = () => {
+  form.value.telefone = formatTelefone(form.value.telefone)
 }
 
 const submitForm = async () => {
+  error.value = '' 
+
+  if (!form.value.nome.trim()) {
+    error.value = 'Nome é obrigatório'
+    return
+  }
+  if (!form.value.documento.trim()) {
+    error.value = 'Documento é obrigatório'
+    return
+  }
+  if (form.value.email && !/\S+@\S+\.\S+/.test(form.value.email)) {
+    error.value = 'Email inválido'
+    return
+  }
+
+  if (form.value.tipo === 'fisica' && form.value.documento.replace(/\D/g, '').length !== 11) {
+    error.value = 'CPF deve ter 11 dígitos'
+    return
+  }
+  if (form.value.tipo === 'juridica' && form.value.documento.replace(/\D/g, '').length !== 14) {
+    error.value = 'CNPJ deve ter 14 dígitos'
+    return
+  }
+  if (form.value.telefone && form.value.telefone.replace(/\D/g, '').length < 10) {
+    error.value = 'Telefone deve ter pelo menos 10 dígitos'
+    return
+  }
+
   try {
     const token = localStorage.getItem('token')
-    const url = pessoaEdit.value ? `/pessoas/${pessoaEdit.value.id}` : '/pessoas'
-    const method = pessoaEdit.value ? 'put' : 'post'
+    const url = props.pessoa ? `/pessoas/${props.pessoa.id}` : '/pessoas'
+    const method = props.pessoa ? 'put' : 'post'
 
     const payload = {
       nome: form.value.nome,
       email: form.value.email,
-      telefone: form.value.telefone,
+      telefone: form.value.telefone.replace(/\D/g, ''), 
       tipo: form.value.tipo,
-      documento: form.value.documento  
+      documento: form.value.documento.replace(/\D/g, '')
     }
 
     const response = await axios[method](url, payload, {
       headers: { Authorization: `Bearer ${token}` }
     })
     emit('save', response.data)
-    closeModal()
+    emit('close')
   } catch (err) {
     console.error('Erro ao salvar pessoa:', err)
     if (err.response && err.response.status === 422) {
-      console.log('Erros de validação:', err.response.data.errors)
+      error.value = Object.values(err.response.data.errors).flat().join(', ')
+    } else {
+      error.value = 'Erro inesperado. Tente novamente.'
     }
   }
 }
 
-defineExpose({ openModal })
 </script>
